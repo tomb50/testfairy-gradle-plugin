@@ -17,6 +17,8 @@ class TestFairyExtension {
 	private Boolean autoUpdate = false
 	private Boolean recordOnBackground = false
 	private Boolean uploadProguardMapping = false
+    private String digestAlgorithm = "SHA1"
+    private String signAlgorithm =  "MD5withRSA"
 
 	private String serverEndpoint = "https://app.testfairy.com"
 
@@ -133,6 +135,22 @@ class TestFairyExtension {
 
     Boolean getUploadProguardMapping(){
         return uploadProguardMapping;
+    }
+
+    String getDigestAlgorithm() {
+        return digestAlgorithm
+    }
+
+    void digestAlgorithm( final String digestAlgorithm ) {
+        this.digestAlgorithm = digestAlgorithm
+    }
+
+    String getSignAlgorithm() {
+        return signAlgorithm
+    }
+
+    void signAlgorithm( final String signAlgorithm ) {
+        this.signAlgorithm = signAlgorithm
     }
 }
 

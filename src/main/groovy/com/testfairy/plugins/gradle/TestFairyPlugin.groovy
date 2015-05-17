@@ -130,7 +130,8 @@ class TestFairyPlugin implements Plugin<Project> {
 									downloadFile(instrumentedUrl, tempFilename)
 
 									// resign using gradle build settings
-									resignApk(tempFilename, variant.signingConfig)
+									resignApk(tempFilename, variant.signingConfig, extension.digestAlgorithm,
+                                              extension.signAlgorithm)
 
 									// upload the signed apk file back to testfairy
 									json = uploadSignedApk(extension, tempFilename)
@@ -450,14 +451,14 @@ class TestFairyPlugin implements Plugin<Project> {
 	 * @param apkFilename
 	 * @param sc
 	 */
-	void resignApk(String apkFilename, sc) {
+	void resignApk(String apkFilename, sc, String digestAlg, String signAlg) {
 
 		// use a temporary file in the same directory as apkFilename
 		String outFilename = apkFilename + ".temp"
 
 		// remove signature onto temp file, sign and zipalign back onto original filename
 		removeSignature(apkFilename, outFilename)
-		signApkFile(outFilename, sc)
+		signApkFile(outFilename, sc, digestAlg, signAlg)
 		zipAlignFile(outFilename, apkFilename)
 		(new File(outFilename)).delete()
 
@@ -471,8 +472,18 @@ class TestFairyPlugin implements Plugin<Project> {
 	 * @param apkFilename
 	 * @param sc
 	 */
-	void signApkFile(String apkFilename, sc) {
-		def command = [jarSignerPath, "-keystore", sc.storeFile, "-storepass", sc.storePassword, "-keypass", sc.keyPassword, "-digestalg", "SHA1", "-sigalg", "MD5withRSA", apkFilename, sc.keyAlias]
+	void signApkFile(String apkFilename, sc, String digestAlg, String signAlg) {
+		def command = [jarSignerPath, "-keystore", sc.storeFile, "-storepass", sc.storePassword, "-keypass", sc.keyPassword]
+        if(digestAlg != null){
+            command.add("-digestalg")
+            command.add(digestAlg)
+        }
+        if(signAlg != null){
+            command.add("-sigalg")
+            command.add(signAlg)
+        }
+        command.add(apkFilename)
+        command.add(sc.keyAlias)
 		def proc = command.execute()
 		proc.consumeProcessOutput()
 		proc.waitFor()
